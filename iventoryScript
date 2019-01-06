@@ -1,0 +1,155 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class IventoryScript : MonoBehaviour {
+
+    public int SelWep;
+    int SelAmmo;
+
+    public BowScript Bow;
+    public Rigidbody _arrow;
+
+    [HideInInspector]
+    public static IventoryScript instance;
+
+
+    public delegate void OnItemChanged();
+    public OnItemChanged onItemChangedCallback;
+
+    public List<ItemScript> items = new List<ItemScript>();
+    public List<InventorySlot> ItemSlotLists = new List<InventorySlot>();
+
+    public InventorySlot InvenSP;
+    public GameObject InvenListObj;
+
+    public ItemScript PlaceHolder;
+
+    public void Add(ItemScript item)
+    {
+
+
+        bool Check = false;
+        //items.Add(item);
+        //AddSlotPlacement(item);
+
+        if (items.Count != 0)
+        {
+            print("goku");
+            for (int i = 0; i < items.Count; i++)
+            {
+                print("mikey" + i);
+
+                if (item.name == items[i].name)
+                {
+                    
+                    Check = true;
+                    for (int o = 0; o < ItemSlotLists.Count; o++)
+                    {
+                        if (item.name == ItemSlotLists[o].ListName)
+                        {
+                            if (item.CanStack)
+                            {
+                                print("you tried");
+                                ItemSlotLists[o].Amount++;
+                                return;
+                            }
+
+                        }
+                        else
+                        {
+                            print("adding new slot");
+                            AddSlotPlacement(item);
+                            return;
+                        }
+                    }
+                    Check = true;
+
+                }
+                else if (item.name != items[i].name)
+                {
+
+                    if ( Check == false)
+                    {
+                        items.Add(item);
+                        AddSlotPlacement(item);
+                        return;
+
+                    }
+                }
+
+            }
+        }
+        else
+        {
+            print("hello?");
+            items.Add(item);
+            AddSlotPlacement(item);
+        }
+
+
+      
+
+
+        if (onItemChangedCallback != null)
+        {
+            onItemChangedCallback.Invoke();
+            print("INNNNNVOOOKEE");
+        }
+    }
+
+
+    void Awake()
+    {
+        instance = this;
+        //items.Add(PlaceHolder);
+        //AddSlotPlacement(PlaceHolder);
+        
+    }
+    //public void Remove(ItemScript item)
+    //{
+    //    items.Remove(item);
+
+    //    if (onItemChangedCallback != null)
+    //    {
+    //        onItemChangedCallback.Invoke();
+    //    }
+    //}
+
+
+
+    void AddSlotPlacement(ItemScript itemS)
+    {
+
+        InventorySlot newSlot = Instantiate(InvenSP);
+        newSlot.AddItem(itemS);
+        newSlot.transform.parent = InvenListObj.transform;
+        newSlot.transform.localScale = new Vector3(1, 1, 1);
+        
+        ItemSlotLists.Add(newSlot);
+
+    }
+
+
+
+
+
+    void Update()
+    {
+        Bow.arrowObj = _arrow.GetComponent<Rigidbody>();
+
+
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            Bow.Fire(true);
+        }
+
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+            Bow.Fire(false);
+        }
+
+    }
+
+
+}
